@@ -1,5 +1,4 @@
 export const initialState = {
-  count: 1,
   loading: true,
   sortBy: null,
   data: [],
@@ -17,14 +16,20 @@ export const reducer = (state, action) => {
         ...state,
         page: state.page + 1,
         data: [...state.data, ...action.pre],
-        loading: false,
+        loading: true,
       };
     case "loadingTrue":
       return { ...state, loading: true };
     case "loadingFalse":
       return { ...state, loading: false };
     case "resetandsort":
-      return { ...state, data: [], sortBy: action.model, page: 1 };
+      return {
+        ...state,
+        data: [],
+        sortBy: action.model,
+        page: 1,
+        loading: true,
+      };
 
     default:
       return state;

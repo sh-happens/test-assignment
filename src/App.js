@@ -1,99 +1,57 @@
-import React, { useContext, useEffect, useState } from "react";
-
+import React, { useState, useEffect, useContext } from "react";
 import { getAscii } from "./helpers/getProducts";
 import { ThisContext } from "./index";
 import { Helpers } from "./helpers/helpers";
-
 import Spinner from "./helpers/Spinner";
+
+import Add from "./components/Add";
 
 export default () => {
   const { state, dispatch } = useContext(ThisContext);
   const [isFetching, setIsFetching] = useState(false);
 
-  // useEffect(() => {
-  //   getAscii(1, 20, dispatch);
-  // }, []);
-
-  // useEffect(() => {
-  //   window.addEventListener("scroll", onScroll);
-  // }, [state, onScroll]);
-
-  // const onScroll = () => {
-  //   if (
-  //     window.innerHeight + window.scrollY >= document.body.offsetHeight &&
-  //     state.more == false &&
-  //     state.loading == false
-  //   ) {
-  //     getAscii(state.page, 21, dispatch);
-  //   }
-  // };
-
   useEffect(() => {
     getAscii(1, 20, dispatch, state.sortBy, false);
-    console.log("first use effect is run");
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   function handleScroll() {
     if (
-      window.innerHeight + document.documentElement.scrollTop !==
-        document.documentElement.offsetHeight ||
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 ||
       isFetching
     )
-      return;
-    setIsFetching(true);
+      setIsFetching(true);
   }
 
   useEffect(() => {
     if (!isFetching) return;
     fetchMoreListItems();
-  }, [isFetching, state.data]);
+  }, [isFetching]);
 
   const fetchMoreListItems = () => {
-    // console.log('fetchMoreListItems runs')
     getAscii(state.page, 20, dispatch, state.sortBy, false);
     setTimeout(() => {
       setIsFetching(false);
-    }, 1500);
+    }, 1000);
   };
-
-  const addRender = (id) => {
-    return (
-      <tr>
-        <td>
-          <img src={`/ads/?r=6`} />
-        </td>
-        {HasMore()}
-        {End()}
-      </tr>
-    );
-  };
-
-  const HasMore = () =>
-    isFetching && (
-      <td>
-        <Spinner />
-      </td>
-    );
-  const End = () => state.more == false && <td>~ end of catalogue ~</td>;
-
-  const Table = () => {
-    return (
-      <Table className='container'>
+  return (
+    <>
+      {state.loading || isFetching ? <Spinner /> : null}
+      <table className='container'>
         <thead>
           <tr>
             <th onClick={() => getAscii(1, 20, dispatch, "id", true)}>
-              <h1>ID</h1>
+              <h1>{state.sortBy == "id" && <p>Sorted by</p>} ID </h1>
             </th>
             <th onClick={() => getAscii(1, 20, dispatch, "size", true)}>
-              <h1>Size</h1>
+              <h1>{state.sortBy == "size" && <p>Sorted by</p>}Size</h1>
             </th>
             <th>
               <h1>Face</h1>
             </th>
             <th onClick={() => getAscii(1, 20, dispatch, "price", true)}>
-              <h1>Price</h1>
+              <h1>{state.sortBy == "price" && <p> Sorted by </p>} Price </h1>
             </th>
             <th>
               <h1>Date</h1>
@@ -103,11 +61,17 @@ export default () => {
         {state.data.map((r, i) => {
           let tnow = new Date().getTime();
           let tdate = new Date(r.date).getTime();
-          let currencyString = "$" + (r.price / 100).toFixed(2);
+          let currencyString = "£" + (r.price / 100).toFixed(2);
           return (
             <tbody key={r.id}>
-              {i !== 0 && (i + 1) % 20 === 0 && addRender(r.id)}
-
+              <tr>
+                {state.loading == false && i !== 0 && (i + 1) % 20 === 0 ? (
+                  <Add id={r.id} />
+                ) : null}
+                {/* {isFetching && i !== 0 && (i + 1) % 20 === 0 ? (
+                  <Spinner />
+                ) : null} */}
+              </tr>
               <tr>
                 <td>{r.id}</td>
                 <td>{r.size}</td>
@@ -115,12 +79,12 @@ export default () => {
                 <td>{currencyString}</td>
                 <td>{Helpers.daysDiff(tnow, tdate, r.date)}</td>
               </tr>
+              {state.more == false && <td>~ end of catalogue ~</td>}
             </tbody>
           );
         })}
-      </Table>
-    );
-  };
-
-  return <> {state.loading ? <Spinner /> : <Table />}</>;
+      </table>
+      {isFetching && <Spinner />}
+    </>
+  );
 };
