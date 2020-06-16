@@ -13,8 +13,8 @@ export default ({ id }) => {
     adsId[id] = rdId;
   }
   return (
-    <td>
+    <div>
       <img src={`/ads/?r=${rdId}`} />
-    </td>
+    </div>
   );
 };

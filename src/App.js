@@ -3,6 +3,7 @@ import { getAscii } from "./helpers/getProducts";
 import { ThisContext } from "./index";
 import { Helpers } from "./helpers/helpers";
 import Spinner from "./helpers/Spinner";
+import "./css/main.css";
 
 import Add from "./components/Add";
 
@@ -16,75 +17,72 @@ export default () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  function handleScroll() {
+  const handleScroll = () => {
     if (
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50 ||
-      isFetching
-    )
+      window.innerHeight + window.scrollY >= document.body.offsetHeight &&
+      !isFetching
+    ) {
       setIsFetching(true);
-  }
+    } else {
+      setIsFetching(false);
+    }
+  };
 
   useEffect(() => {
-    if (!isFetching) return;
-    fetchMoreListItems();
+    isFetching && getAscii(state.page, 20, dispatch, state.sortBy, false);
   }, [isFetching]);
 
-  const fetchMoreListItems = () => {
-    getAscii(state.page, 20, dispatch, state.sortBy, false);
-    setTimeout(() => {
-      setIsFetching(false);
-    }, 1000);
-  };
   return (
-    <>
-      {state.loading || isFetching ? <Spinner /> : null}
-      <table className='container'>
-        <thead>
-          <tr>
-            <th onClick={() => getAscii(1, 20, dispatch, "id", true)}>
-              <h1>{state.sortBy == "id" && <p>Sorted by</p>} ID </h1>
-            </th>
-            <th onClick={() => getAscii(1, 20, dispatch, "size", true)}>
-              <h1>{state.sortBy == "size" && <p>Sorted by</p>}Size</h1>
-            </th>
-            <th>
-              <h1>Face</h1>
-            </th>
-            <th onClick={() => getAscii(1, 20, dispatch, "price", true)}>
-              <h1>{state.sortBy == "price" && <p> Sorted by </p>} Price </h1>
-            </th>
-            <th>
-              <h1>Date</h1>
-            </th>
-          </tr>
-        </thead>
-        {state.data.map((r, i) => {
-          let tnow = new Date().getTime();
-          let tdate = new Date(r.date).getTime();
-          let currencyString = "£" + (r.price / 100).toFixed(2);
-          return (
-            <tbody key={r.id}>
-              <tr>
-                {state.loading == false && i !== 0 && (i + 1) % 20 === 0 ? (
-                  <Add id={r.id} />
-                ) : null}
-                {/* {isFetching && i !== 0 && (i + 1) % 20 === 0 ? (
-                  <Spinner />
-                ) : null} */}
-              </tr>
-              <tr>
-                <td>{r.id}</td>
-                <td>{r.size}</td>
-                <td style={{ fontSize: r.size }}>{r.face}</td>
-                <td>{currencyString}</td>
-                <td>{Helpers.daysDiff(tnow, tdate, r.date)}</td>
-              </tr>
-              {state.more == false && <td>~ end of catalogue ~</td>}
-            </tbody>
-          );
-        })}
-      </table>
+    <div className='container'>
+      {state.loading ? <Spinner /> : null}
+      <div>
+        <div className='header'>
+          <p>Click to sort: </p>
+          <div
+            className='sortingTitle'
+            onClick={() => getAscii(1, 20, dispatch, "id", true)}
+          >
+            <h3>{state.sortBy == "id" && <p>Sorted by</p>} ID </h3>
+          </div>
+          <div
+            className='sortingTitle'
+            onClick={() => getAscii(1, 20, dispatch, "size", true)}
+          >
+            <h3>{state.sortBy == "size" && <p>Sorted by</p>}Size</h3>
+          </div>
+          <div
+            className='sortingTitle'
+            onClick={() => getAscii(1, 20, dispatch, "price", true)}
+          >
+            <h3>{state.sortBy == "price" && <p> Sorted by </p>} Price </h3>
+          </div>
+        </div>
+        <div className='itemsContainer'>
+          {state.data.map((r, i) => {
+            let tnow = new Date().getTime();
+            let tdate = new Date(r.date).getTime();
+            let currencyString = "$" + (r.price / 100).toFixed(2);
+            return (
+              <div className='itemInnerContainer' key={r.id}>
+                <div>
+                  {state.loading == false && i !== 0 && (i + 1) % 20 === 0 ? (
+                    <Add id={r.id} />
+                  ) : null}
+                </div>
+                <div className='item'>
+                  <div>{r.id}</div>
+                  <div>{r.size}</div>
+                  <div style={{ fontSize: r.size }}>{r.face}</div>
+                  <div>{currencyString}</div>
+                  <div>{Helpers.daysDiff(tnow, tdate, r.date)}</div>
+                </div>
+                {state.more == false && <div>~ end of catalogue ~</div>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
       {isFetching && <Spinner />}
-    </>
+    </div>
   );
 };
