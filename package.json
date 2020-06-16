@@ -15,7 +15,6 @@
   "dependencies": {
     "@babel/polyfill": "^7.10.1",
     "@babel/runtime": "^7.10.2",
-    "antd": "^4.3.3",
     "babel-plugin-import": "^1.13.0",
     "babel-plugin-module-resolver": "^4.0.0",
     "concurrently": "^5.2.0",
@@ -24,6 +23,7 @@
     "json-server": "^0.9.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-loading-overlay": "^1.0.1",
     "style-loader": "^1.2.1"
   },
   "devDependencies": {
